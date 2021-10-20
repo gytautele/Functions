@@ -1,47 +1,48 @@
-from tkinter import *
-import time
-import sqlite3
-import random
-import tempfile
-import win32api
-import win32print
+def modify():
+    global cur, c, accept, flag, att, up, n, name_, apt, st, col, col_n
+    col = ('', '', 'type', 'qty_left', 'cost', 'purpose', 'expdt', 'loc', 'mfg')
+    col_n = ('', '', 'Type', 'Quantity Left', 'Cost', 'Purpose', 'Expiry Date', 'Rack location', 'Manufacture')
+    flag = 'st'
+    name_ = ''
+    apt.destroy()
+    n = []
+    cur.execute("select * from med")
+    for i in cur:
+        n.append(i[1])
+    c.commit()
+    st = Tk()
+    st.title('MODIFY')
+    Label(st, text='-' * 48 + ' MODIFY DATABASE ' + '-' * 48).grid(row=0, column=0, columnspan=6)
 
-f = ''
-flag = ''
-flags = ''
+    def onvsb(*args):
+        name_.yview(*args)
 
-login = sqlite3.connect("admin.db")
-l = login.cursor()
+    def onmousewheel():
+        name_.ywiew = ('scroll', event.delta, 'units')
+        return 'break'
 
-c = sqlite3.connect("medicine.db")
-cur = c.cursor()
+    cx = 0
+    vsb = Scrollbar(orient='vertical', command=onvsb)
+    vsb.grid(row=1, column=3, sticky=N + S)
+    name_ = Listbox(st, width=43, yscrollcommand=vsb.set)
+    cur.execute("select *from med")
+    for i in cur:
+        cx += 1
+        name_.insert(cx, (str(i[0]) + '.  ' + str(i[1])))
+        name_.grid(row=1, column=1, columnspan=2)
+    c.commit()
+    name_.bind('<MouseWheel>', onmousewheel)
+    name_.bind('<<ListboxSelect>>', sel_mn)
 
-columns = ('Sl No', 'Name', 'Type', 'Quantity Left', 'Cost', 'Purpose', 'Expiry Date', 'Rack location', 'Manufacture')
-
-
-def open_win():
-    global apt, flag
-    flag = 'apt'
-    apt = Tk()
-    apt.title("Interface")
-    Label(apt, text="EVANZ MEDICAL STORE COMPANY").grid(row=0, column=0, columnspan=3)
-    Label(apt, text='*' * 80).grid(row=1, column=0, columnspan=3)
-    Label(apt, text='-' * 80).grid(row=3, column=0, columnspan=3)
-
-    Label(apt, text="Stock Maintenance", bg='green', fg='white').grid(row=2, column=0)
-    Button(apt, text='New V.C.', width=25, bg='green', fg='white', command=val_cus).grid(row=4, column=0)
-    Button(apt, text='Add product to Stock', bg='green', fg='white', width=25, command=stock).grid(row=5, column=0)
-    Button(apt, text='Delete product from Stock', bg='red', fg='white', width=25, command=delete_stock).grid(row=6,
-                                                                                                             column=0)
-
-    Label(apt, text="Access Database", bg='blue', fg='white').grid(row=2, column=1)
-    Button(apt, text='Modify', width=15, bg='blue', fg='white', command=modify).grid(row=4, column=1)
-    Button(apt, text='Search', width=15, bg='blue', fg='white', command=search).grid(row=5, column=1)
-    Button(apt, text='Expiry Check', bg='red', fg='white', width=15, command=exp_date).grid(row=6, column=1)
-
-    Label(apt, text="Handle Cash Flows", bg='skyblue', fg='black').grid(row=2, column=2)
-    Button(apt, text="Check Today's Revenue", bg='skyblue', fg='black', width=20, command=show_rev).grid(row=5,
-                                                                                                         column=2)
-    Button(apt, text='Billing', width=20, bg='skyblue', fg='black', command=billing).grid(row=4, column=2)
-    Button(apt, text='Logout', bg='red', fg='white', width=20, command=again).grid(row=6, column=2)
-    apt.mainloop()
+    Label(st, text='Enter Medicine Name: ').grid(row=1, column=0)
+    Label(st, text='Enter changed Value of: ').grid(row=2, column=0)
+    att = Spinbox(st, values=col_n)
+    att.grid(row=2, column=1)
+    up = Entry(st)
+    up.grid(row=2, column=2)
+    Button(st, width=10, text='Submit', bg='green', fg='white', command=save_mod).grid(row=2, column=4)
+    Button(st, width=10, text='Reset', bg='red', fg='white', command=res).grid(row=2, column=5)
+    Button(st, width=10, text='Show data', bg='blue', fg='white', command=show_val).grid(row=1, column=4)
+    Label(st, text='-' * 120).grid(row=3, column=0, columnspan=6)
+    Button(st, width=10, text='Main Menu', bg='green', fg='white', command=main_menu).grid(row=5, column=5)
+    st.mainloop()
